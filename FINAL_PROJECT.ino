@@ -9,7 +9,6 @@ const int inButtonPinR = 5;
 bool switchState;
 
 
-
 void setup() {
   CircuitPlayground.begin(10);
   
@@ -44,6 +43,7 @@ void resetFlags(){
   buttonFlagR = false;
 }
 
+
 void generateGoal(){
   goal = random(10);
   int temp = random(2);
@@ -54,6 +54,8 @@ void generateGoal(){
     color = false;
   }
 }
+
+
 void generateLights(int goal, int index){
   CircuitPlayground.clearPixels();
   if (color) {
@@ -66,43 +68,47 @@ void generateLights(int goal, int index){
 }
 
 
-
-   
-
-
 void loop() {
-  if (isCorrect) {
-    generateGoal();
-    isCorrect = false;
+  if (switchFlag) {
+    if (isCorrect) {
+      generateGoal();
+      isCorrect = false;
+    }
+    else {
+      for (int index = 0; index < 10; index++) {
+        generateLights(goal, index);
+        if (((color && buttonFlagL) || (!color && buttonFlagR)) && (index == goal)) {
+          speed = 1.5 * speed;
+          CircuitPlayground.playTone(700,100);
+          isCorrect = true;
+          resetFlags();
+        }
+        else if (buttonFlagL || buttonFlagR) {
+          CircuitPlayground.playTone(300,100);
+          speed = 1;
+          resetFlags();
+        } 
+        delay(500 / speed);
+      }
+      for (int index = 9; index > -1; index--) {
+        generateLights(goal, index);
+        if (((color && buttonFlagL) || (!color && buttonFlagR)) && (index == goal)) {
+          CircuitPlayground.playTone(700,100);
+          speed = 1.5 * speed;
+          isCorrect = true;
+          resetFlags();
+        }
+        else if (buttonFlagL || buttonFlagR) {
+          CircuitPlayground.playTone(300,100);
+          speed = 1;
+          resetFlags();
+        }
+        delay(500 / speed);    
+      }
+    }
   }
   else {
-    for (int index = 0; index < 10; index++) {
-      generateLights(goal, index);
-      if (((color && buttonFlagL) || (!color && buttonFlagR)) && (index == goal)) {
-        speed = 1.5 * speed;
-        CircuitPlayground.playTone(700,100);
-        isCorrect = true;
-        resetFlags();
-      }
-      else if (buttonFlagL || buttonFlagR) {
-        CircuitPlayground.playTone(300,100);
-        speed = 1;
-        resetFlags();
-      } 
-      delay(500 / speed);
-    }
-    for (int index = 9; index > -1; index--) {
-      generateLights(goal, index);
-      if (((color && buttonFlagL) || (!color && buttonFlagR)) && (index == goal)) {
-        speed = 1.5 * speed;
-        isCorrect = true;
-        resetFlags();
-      }
-      else if (buttonFlagL || buttonFlagR) {
-        speed = 1;
-        resetFlags();
-      }
-      delay(500 / speed);    
-    }
+    CircuitPlayground.clearPixels();
+    speed = 1;
   }
 }
